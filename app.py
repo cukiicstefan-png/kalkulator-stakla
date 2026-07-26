@@ -9,24 +9,6 @@ st.set_page_config(
     layout="centered"
 )
 
-st.markdown("""
-    <style>
-    .main { background-color: #FFFFFF; }
-    .stButton>button {
-        background-color: #2563EB;
-        color: white;
-        font-weight: bold;
-        border-radius: 6px;
-        padding: 0.5rem 1rem;
-        width: 100%;
-    }
-    .stButton>button:hover {
-        background-color: #1D4ED8;
-        color: white;
-    }
-    </style>
-""", unsafe_allow_html=True)
-
 st.title("📐 Kalkulator Gabarita Staklene Ograde")
 
 if 'korak' not in st.session_state:
@@ -67,43 +49,49 @@ with col_nav1:
     if st.button("1. Unos po kotama"):
         st.session_state.korak = 1
 with col_nav2:
-    if st.button("2. Slučaj 1 (Ortogonalni)"):
+    if st.button("2. Slučaj 1"):
         st.session_state.korak = 2
 with col_nav3:
-    if st.button("3. Slučaj 2 (Zaokrenuti)"):
+    if st.button("3. Slučaj 2"):
         st.session_state.korak = 3
 
 st.divider()
 
-# KORAK 1: UNOS DIREKTNO PO KOTAMA
+# KORAK 1: UNOS DIREKTNO NA KOTAMA (PREKO FORME I WIDGETA)
 if st.session_state.korak == 1:
-    st.subheader("Unesite dimenzije direktno na kote")
-    
-    # Vizuelno praćenje pozicija kota: levo (h1), sredina (lk gore), desno (h2)
-    col_h1, col_lk, col_h2 = st.columns([1, 1.5, 1])
-    
-    with col_h1:
-        st.markdown("**Kota h1 (levo)**")
-        st.session_state.h1 = st.number_input("h1", value=float(st.session_state.h1), min_value=1.0, step=1.0, label_visibility="collapsed")
-        
-    with col_lk:
-        st.markdown("**Kota lk (gornja kosa)**")
-        st.session_state.lk = st.number_input("lk", value=float(st.session_state.lk), min_value=1.0, step=1.0, label_visibility="collapsed")
-        
-    with col_h2:
-        st.markdown("**Kota h2 (desno)**")
-        st.session_state.h2 = st.number_input("h2", value=float(st.session_state.h2), min_value=0.0, step=1.0, label_visibility="collapsed")
+    st.subheader("Unesite dimenzije u polja na kotama")
 
-    if st.session_state.lk <= st.session_state.h2:
-        st.error("Greška: Kosa stranica (lk) mora biti veća od visinske razlike (h2)!")
-    
-    st.markdown("<br>", unsafe_allow_html=True)
-    if st.button("Izračunaj Gabarite (Slučaj 1) →"):
-        st.session_state.korak = 2
-        st.rerun()
+    # Koristimo formu da bi unosi bili stabilni i da se dugme za izračunavanje lepo ponaša
+    with st.form("kote_form"):
+        # Raspored polja koji vizuelno gađa pozicije kota (levo za h1, gore za lk, desno za h2)
+        c_levo, c_centar, c_desno = st.columns([1, 1.2, 1])
+        
+        with c_levo:
+            st.markdown("##### Kota h1 (levo)")
+            val_h1 = st.number_input("h1", value=float(st.session_state.h1), min_value=1.0, step=1.0)
+            
+        with c_centar:
+            st.markdown("##### Kota lk (gornja)")
+            val_lk = st.number_input("lk", value=float(st.session_state.lk), min_value=1.0, step=1.0)
+            
+        with c_desno:
+            st.markdown("##### Kota h2 (desno)")
+            val_h2 = st.number_input("h2", value=float(st.session_state.h2), min_value=0.0, step=1.0)
 
-    # Tehnička skica sa ucrtanim kotama
-    fig, ax = plt.subplots(figsize=(8, 4.5))
+        submitted = st.form_submit_button("Izračunaj Gabarite (Slučaj 1) →")
+        
+        if submitted:
+            st.session_state.h1 = val_h1
+            st.session_state.lk = val_lk
+            st.session_state.h2 = val_h2
+            if val_lk <= val_h2:
+                st.error("Greška: Kosa stranica (lk) mora biti veća od visinske razlike (h2)!")
+            else:
+                st.session_state.korak = 2
+                st.rerun()
+
+    # Prikaz čiste skize sa ucrtanim kotama ispod
+    fig, ax = plt.subplots(figsize=(7, 4))
     ax.set_aspect('equal')
     ax.axis('off')
     
@@ -144,7 +132,7 @@ elif st.session_state.korak == 2:
     st.subheader("Slučaj 1 — Ortogonalni pripremak")
     st.info(f"Površina pripremka: **P1 = {res['p1_m2']:.3f} m²** | Škarta: **{skart:.3f} m²**")
     
-    fig, ax = plt.subplots(figsize=(8, 4.5))
+    fig, ax = plt.subplots(figsize=(7, 4))
     ax.set_aspect('equal')
     ax.axis('off')
     
@@ -176,7 +164,7 @@ elif st.session_state.korak == 2:
     
     c1, c2 = st.columns(2)
     with c1:
-        if st.button("← Nazad na unos kota"):
+        if st.button("← Nazad na unos"):
             st.session_state.korak = 1
             st.rerun()
     with c2:
@@ -192,7 +180,7 @@ elif st.session_state.korak == 3:
     st.subheader("Slučaj 2 — Zaokrenuti pripremak")
     st.info(f"Površina pripremka: **P2 = {res['p2_m2']:.3f} m²** | Škarta: **{skart:.3f} m²**")
     
-    fig, ax = plt.subplots(figsize=(8, 4.5))
+    fig, ax = plt.subplots(figsize=(7, 4))
     ax.set_aspect('equal')
     ax.axis('off')
     

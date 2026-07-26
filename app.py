@@ -57,26 +57,19 @@ with col_nav3:
 
 st.divider()
 
-# KORAK 1: UNOS DIREKTNO NA KOTAMA (PREKO FORME I WIDGETA)
+# KORAK 1: UNOS DIREKTNO U POLJA UZ KOTE
 if st.session_state.korak == 1:
     st.subheader("Unesite dimenzije u polja na kotama")
 
-    # Koristimo formu da bi unosi bili stabilni i da se dugme za izračunavanje lepo ponaša
-    with st.form("kote_form"):
-        # Raspored polja koji vizuelno gađa pozicije kota (levo za h1, gore za lk, desno za h2)
-        c_levo, c_centar, c_desno = st.columns([1, 1.2, 1])
-        
-        with c_levo:
-            st.markdown("##### Kota h1 (levo)")
-            val_h1 = st.number_input("h1", value=float(st.session_state.h1), min_value=1.0, step=1.0)
-            
-        with c_centar:
-            st.markdown("##### Kota lk (gornja)")
-            val_lk = st.number_input("lk", value=float(st.session_state.lk), min_value=1.0, step=1.0)
-            
-        with c_desno:
-            st.markdown("##### Kota h2 (desno)")
-            val_h2 = st.number_input("h2", value=float(st.session_state.h2), min_value=0.0, step=1.0)
+    with st.form("kote_vizuelno"):
+        # Raspored gde su polja uokvirena i vizuelno prate kote h1 (levo), lk (sredina/gore), h2 (desno)
+        c1, c2, c3 = st.columns(3)
+        with c1:
+            val_h1 = st.number_input("Kota h1 (levo)", value=float(st.session_state.h1), min_value=1.0, step=1.0)
+        with c2:
+            val_lk = st.number_input("Kota lk (gornja)", value=float(st.session_state.lk), min_value=1.0, step=1.0)
+        with c3:
+            val_h2 = st.number_input("Kota h2 (desno)", value=float(st.session_state.h2), min_value=0.0, step=1.0)
 
         submitted = st.form_submit_button("Izračunaj Gabarite (Slučaj 1) →")
         
@@ -90,7 +83,7 @@ if st.session_state.korak == 1:
                 st.session_state.korak = 2
                 st.rerun()
 
-    # Prikaz čiste skize sa ucrtanim kotama ispod
+    # Skica sa čistim vrednostima kota
     fig, ax = plt.subplots(figsize=(7, 4))
     ax.set_aspect('equal')
     ax.axis('off')
@@ -108,15 +101,12 @@ if st.session_state.korak == 1:
     
     ax.add_patch(patches.Polygon([t1, t2, t3, t4], closed=True, facecolor="#F8FAFC", edgecolor="#0F172A", linewidth=2))
     
-    # Kota h1
     ax.annotate('', xy=(ox - off, oy), xytext=(ox - off, oy - h1_p), arrowprops=dict(arrowstyle='<->', color='black', lw=1.5))
     ax.text(ox - off - 0.3, oy - h1_p/2, f"h1 = {st.session_state.h1:.0f}", fontweight='bold', fontsize=10, ha='center', va='center', rotation=90)
     
-    # Kota h2
     ax.annotate('', xy=(ox + dx + off, oy), xytext=(ox + dx + off, oy - h2_p), arrowprops=dict(arrowstyle='<->', color='black', lw=1.5))
     ax.text(ox + dx + off + 0.3, oy - h2_p/2, f"h2 = {st.session_state.h2:.0f}", fontweight='bold', fontsize=10, ha='center', va='center', rotation=90)
     
-    # Kota lk
     ax.annotate('', xy=(t4[0], t4[1] - off), xytext=(t3[0], t3[1] - off), arrowprops=dict(arrowstyle='<->', color='black', lw=1.5))
     ax.text((t4[0]+t3[0])/2, t4[1] - off - 0.3, f"lk = {st.session_state.lk:.0f}", fontweight='bold', fontsize=10, ha='center', va='center')
 
